@@ -128,10 +128,20 @@ Kembalikan **JSON array berisi 3 resep**, tanpa teks tambahan:
         const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
         const recipesArray = JSON.parse(cleanedJson);
 
+        if (!Array.isArray(recipesArray)) {
+            throw new Error('AI did not return a valid array of recipes.');
+        }
+
         return NextResponse.json(recipesArray);
 
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Terjadi kesalahan saat membuat resep. AI mungkin tidak memberikan format yang benar.' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Error details:', error);
+        return NextResponse.json(
+            {
+                error: 'Terjadi kesalahan saat memproses resep dari AI.',
+                details: error.message,
+            },
+            { status: 500 },
+        );
     }
 }
