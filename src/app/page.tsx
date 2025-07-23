@@ -37,7 +37,7 @@ export default function HomePage() {
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients: ingredientsArray,cuisineType }),
+        body: JSON.stringify({ ingredients: ingredientsArray }),
       });
 
       const data = await response.json();
@@ -52,12 +52,8 @@ export default function HomePage() {
       }
 
       setRecipes(data);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred.');
-      }
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
@@ -316,7 +312,7 @@ export default function HomePage() {
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🍳</div>
                 <p className="text-xl text-gray-500 mb-2">Hasil resep akan muncul di sini</p>
-                <p className="text-gray-400">Masukkan bahan-bahan dan klik &quot;Buat Resep&quot;</p>
+                <p className="text-gray-400">Masukkan bahan-bahan dan klik "Buat Resep"</p>
               </div>
           )}
         </main>
