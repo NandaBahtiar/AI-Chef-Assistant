@@ -134,12 +134,12 @@ Kembalikan **JSON array berisi 3 resep**, tanpa teks tambahan:
 
         return NextResponse.json(recipesArray);
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error details:', error);
         return NextResponse.json(
             {
                 error: 'Terjadi kesalahan saat memproses resep dari AI.',
-                details: error.message,
+                details: error instanceof Error ? error.message : String(error),
             },
             { status: 500 },
         );
