@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 export async function POST(request: Request) {
     console.log(JSON.stringify(request));
     try {
-        const { ingredients } = await request.json();
+        const { ingredients,cuisineType } = await request.json();
 
         if (!ingredients) {
             return NextResponse.json({ error: 'Bahan tidak boleh kosong' }, { status: 400 });
@@ -22,6 +22,8 @@ export async function POST(request: Request) {
 
 "${ingredients}"
 
+jenis masakannya "${cuisineType}".
+jika "${cuisineType}" kosong jagan berikan jenis masakannya
 ---
 
 ## TAHAP 1: VALIDASI BAHAN (WAJIB)
@@ -104,7 +106,7 @@ Kembalikan **JSON array berisi 3 resep**, tanpa teks tambahan:
 
 ---
 
-## JENIS RESEP YANG WAJIB DIBUAT:
+## JENIS RESEP YANG WAJIB DIBUAT buat 4 resep:
 
 
 ---
@@ -123,28 +125,23 @@ Kembalikan **JSON array berisi 3 resep**, tanpa teks tambahan:
         const responseText = await result.response.text();
 
         // Membersihkan dan mem-parsing output JSON dari AI
-        const jsonRegex = /```json\n([\s\S]*?)\n```/;
-        const match = responseText.match(jsonRegex);
+        const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+        const recipesArray = JSON.parse(cleanedJson);
 
-        if (match && match[1]) {
-            const cleanedJson = match[1].trim();
-            const recipesArray = JSON.parse(cleanedJson);
-            return NextResponse.json(recipesArray);
-        } else {
-            // Jika tidak ada blok JSON yang cocok, coba bersihkan secara manual
-            const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-            try {
-                const recipesArray = JSON.parse(cleanedJson);
-                return NextResponse.json(recipesArray);
-            } catch (parseError) {
-                console.error("Gagal mem-parsing JSON bahkan setelah pembersihan manual:", parseError);
-                console.error("Respons asli dari AI:", responseText);
-                return NextResponse.json({ error: 'Gagal mem-parsing respons dari AI.' }, { status: 500 });
-            }
+        if (!Array.isArray(recipesArray)) {
+            throw new Error('AI did not return a valid array of recipes.');
         }
 
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Terjadi kesalahan saat membuat resep. AI mungkin tidak memberikan format yang benar.' }, { status: 500 });
+        return NextResponse.json(recipesArray);
+
+    } catch (error: any) {
+        console.error('Error details:', error);
+        return NextResponse.json(
+            {
+                error: 'Terjadi kesalahan saat memproses resep dari AI.',
+                details: error.message,
+            },
+            { status: 500 },
+        );
     }
 }
