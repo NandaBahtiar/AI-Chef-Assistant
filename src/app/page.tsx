@@ -52,8 +52,12 @@ export default function HomePage() {
       }
 
       setRecipes(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -312,7 +316,7 @@ export default function HomePage() {
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🍳</div>
                 <p className="text-xl text-gray-500 mb-2">Hasil resep akan muncul di sini</p>
-                <p className="text-gray-400">Masukkan bahan-bahan dan klik "Buat Resep"</p>
+                <p className="text-gray-400">Masukkan bahan-bahan dan klik &quot;Buat Resep&quot;</p>
               </div>
           )}
         </main>
